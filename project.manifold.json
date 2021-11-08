@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://siberianbot.me/manifold/schemes/project",
+
+  "title": "Manifold Project",
+  "description": "Manifold scheme for project definition",
+  "type": "object",
+
+  "properties": {
+    "project": {
+      "type": "object",
+      "$ref": "#/$defs/project",
+      "description": "Project definition"
+    },
+    "dependencies": {
+      "type": "array",
+      "description": "Project dependencies, which could be defined within workspace or somewhere outside of project directory",
+      "items": {
+        "type": "object",
+        "$ref": "#/$defs/dependency"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "steps": {
+      "type": "array",
+      "description": "Collection of steps which should be executed by Manifold",
+      "items": {
+        "type": "object",
+        "$ref": "#/$defs/step"
+      },
+      "minItems": 1
+    }
+  },
+  "required": ["project", "steps"],
+
+  "$defs": {
+    "projectName": {
+      "type": "string",
+      "pattern": "[a-zA-Z0-9\\-\\_\\.]+"
+    },
+
+    "project": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/projectName",
+          "description": "A well-known name of project, which should be used wherever it possible in Manifold"
+        }
+      },
+      "required": ["name"]
+    },
+
+    "dependency": {
+      "type": "object",
+      "oneOf": [
+        { "$ref": "#/$defs/workspaceDependency" },
+        { "$ref": "#/$defs/pathDependency" }
+      ]
+    },
+
+    "workspaceDependency": {
+      "type": "object",
+      "properties": {
+        "project": {
+          "$ref": "#/$defs/projectName",
+          "description": "A name of dependent project, included in workspace"
+        }
+      },
+      "required": ["project"]
+    },
+
+    "pathDependency": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "A path to dependent project, placed somewhere outside of project directory"
+        }
+      },
+      "required": ["path"]
+    },
+
+    "step": {
+      "type": "object",
+      "oneOf": [{ "$ref": "#/$defs/cmdStep" }],
+
+      "properties": {
+        "stage": {
+          "type": "string",
+          "description": "A name of execution stage"
+        }
+      }
+    },
+
+    "cmdStep": {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "description": "Command for execution via command line"
+        }
+      },
+      "required": ["cmd"]
+    }
+  }
+}
